@@ -1,0 +1,26 @@
+---
+title: "Epidemic prediction modeling and rational evaluation of COVID - 19 in Italy"
+author: "alien adventure team"
+geometry: margin=2cm
+font-size: 12pt
+output:
+       pdf_document
+---
+
+# The research background
+
+Since the outbreak of covid-19, people have been concerned about the outbreak caused by 2019 novel coronavirus (covid-19).Scientific cognition is gradually deepened, coping means are gradually adjusted and information control is gradually enriched. In the course of this development,the scientific community have carried out prediction research on the prospect of the epidemic. Since the global outbreak, Italy has become one of the most affected countries, and the number of new cure people is constantly soaring. Therefore, we studied the situation in Italy.
+
+# The data source
+
+This report is based on the Italian COVID - 19 to predict its future development, so we gathered in Italy on March 1, 2020 to March 30, 2020, the epidemic data of analysis, the data from the world health organization (WHO) published daily epidemic data, as well as daily epidemic figures released by the Italian ministry of health, the cumulative number of cure is ended at 6 PM every day.
+
+# Methods to introduce
+
+At present, we first plan to use piecewise function to fit the accumulative number of diagnosis and the accumulative number of cure. 
+Secondly, by observing the time sequence diagram of variables, further analysis is made, and GARCH model is expected to be used to fit other variables.
+
+# Challenges and solutions
+
+Challenges:It may not be a good predictor. We may also encounter some technical problems.
+ Solution:Search for better model fitting. Look up information or ask someone else.
