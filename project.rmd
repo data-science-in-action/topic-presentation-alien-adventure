@@ -1,7 +1,7 @@
 ---
 title: "Epidemic prediction modeling and rational evaluation of COVID - 19 in Italy"
 author: "alien adventure team"
-geometry: margin=2cm
+geometry: margin=2.5cm
 font-size: 12pt
 output:
        pdf_document
