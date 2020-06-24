@@ -1,0 +1,147 @@
+---
+title: "意大利新冠肺炎疫情预测及理性评估"
+author: "戎翔 高彦梅 卫晓帆 李宇"
+date: "2020年6月12日"
+output:
+  xaringan::moon_reader:
+    css: [default, zh-CN.css]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## 3.实证分析
+
+## 3.1 指数平滑法
+
+## 3.2 ARIMA模型
+
+---
+
+## 3.1.1指数平滑模型理论
+
+&emsp;&emsp;指数平滑预测法是一种确定性的平滑预测法。其实质是通过计算指数平滑平均数来平滑时间序列,消除历史统计序列中的随机波动,以找出其主要发展趋势。根据设置参数的不同可以分为单指数预测,双指数预测,和三指数预测。
+    
+&emsp;&emsp;同时，指数平滑法也广泛应用于传染病发病率的预测，如流感样病例、肝炎等，其基本思想是预测值为历史观测值的加权和，且对不同的历史数据给予不同的权重，新数据赋予较大的权重，旧数据赋予较小的权重，主要用于中短期预测。一次指数平滑法针对没有趋势和季节性的序列，二次指数平滑法针对有趋势但没有季节性的序列，三次指数平滑法针对有趋势也有季节性的序列。根据新冠肺炎疫情数据的特征，本文采用二次指数平滑法进行预测。
+
+---
+
+## 3.1.2指数平滑法的应用
+
+&emsp;&emsp;我们对累计确诊人数使用R中的HoltWinters()进行霍尔特指数平滑预测,并绘出预测和观测值的曲线图，来观看预测结果。
+
+```{r echo=FALSE}
+h<-read.table(file="F:/rstudy/Italy.csv",sep=",",header = T)
+rem<-h$total.deaths+h$total.cure##移除人数
+ncon<-h$total.confirmed-rem##现有确诊人数
+ljqz<-h$total.confirmed
+xzqz<-h$total.confirmed.new.cases
+ljsw<-h$total.deaths
+xzsw<-h$total.new.deaths
+ljzy<-h$total.cure
+xzzy<-h$total.cure.new.cases
+tcforecasts<-HoltWinters(ljqz, gamma=FALSE)
+p4<-plot(tcforecasts,xlab="time",ylab="total confirmed",sub="图4 累计确诊趋势图")
+```
+
+---
+&emsp;&emsp;总体看来，预测的效果还不错（黑色为原始序列，红色为预测值）,这两条线几乎吻合。
+
+```{r echo=FALSE}  
+tcforecasts
+```
+
+&emsp;&emsp;相关预测值如图所示，alpha值为1，beta预测值为0.6313，这些值较大，充分显示了无论是水平上还是趋势的斜率上，当前值对时间序列上的最近的观测值的依赖关系比较重，这符合我们的预期。并利用第一期的数据进行调整，结果如图所示：
+
+---
+```{r echo=FALSE}  
+HoltWinters(ljqz, gamma=FALSE, l.start=1128, b.start=561)
+```
+
+---
+&emsp;&emsp;下面采用forecast包预测未来20天的累计确诊人数，预测图如下所示，图中预测部分使用蓝色的线条标识出来，深灰色的阴影区域为80%，浅灰色阴影区为95%的预测区间。
+
+```{r echo=FALSE}
+library("forecast")
+tcforecasts2<-forecast(tcforecasts, h=20)
+p5<-plot(tcforecasts2,xlab="time",ylab="total confirmed",sub="图5 累计确诊趋势预测图")
+```
+
+---
+&emsp;&emsp;为了检验预测效果，检验延迟1-20阶中的预测误差是否非零自相关，同样继续采用Ljung-Box检验，检验结果如下：
+
+```{r echo=FALSE}
+Box.test(tcforecasts2$residuals, lag=2, type="Ljung-Box")
+```
+
+&emsp;&emsp;经过检验发现，p值大于0.05，说明不存在残差自相关的问题。因此可以做指数平滑模型。
+
+---
+&emsp;&emsp;下面列出未来20天的累计确诊人数，如下表所示：
+```{r echo=FALSE}
+tcforecasts2
+```
+
+&emsp;&emsp;从表中数据可以看出，累计确诊人数还会继续增加，但明显增幅减小。
+
+---
+&emsp;&emsp;为进一步了解意大利的疫情情况，本文将对现存确诊病例数进行预测，结果如下图所示：
+
+```{r echo=FALSE}
+nconforecasts<-HoltWinters(ncon, gamma=FALSE)
+p6<-plot(nconforecasts,xlab="time",ylab="now confirmed",sub="图6 现存确诊趋势图")
+```
+
+&emsp;&emsp;从图形来看，两条曲线基本吻合，并且根据预测的alpha值与beta值的情况，这些数据符合我们的预期。
+
+---
+
+```{r echo=FALSE}  
+nconforecasts
+```
+
+&emsp;&emsp;同理，对上述的参数进行调整，结果如下所示,alpha值与beta值较大，充分显示了无论是水平上还是趋势的斜率上，当前值对时间序列上的最近的观测值的依赖关系比较重，这是符合预期的。
+
+---
+```{r echo=FALSE}
+HoltWinters(ncon, gamma=FALSE, l.start=1016, b.start=489)
+```
+
+---
+&emsp;&emsp;下面对未来20天的现存确诊人数进行预测,预测结果显示，未来20天，现存确诊人数继续下降，下降趋势基本平稳。
+
+```{r echo=FALSE}
+library("forecast")
+nconforecasts2<-forecast(nconforecasts, h=20)
+p7<-plot(nconforecasts2,xlab="time",ylab="now confirmed",sub="图7 现存确诊趋势预测图")
+```
+
+---
+
+&emsp;&emsp;为了检验预测效果，检验延迟1-20阶中的预测误差是否非零自相关，同样继续采用Ljung-Box检验，检验结果如下：
+
+```{r echo=FALSE}
+Box.test(nconforecasts2$residuals, lag=5, type="Ljung-Box")
+```
+
+&emsp;&emsp;经过检验发现，p值大于0.05，说明不存在残差自相关的问题。因此可以做指数平滑模型。
+
+---
+
+&emsp;&emsp;下面列出未来20天的现存确诊人数，如下表所示：
+
+```{r echo=FALSE}
+nconforecasts2
+```
+
+&emsp;&emsp;从表中可以看出，预计在6月12日，意大利现存确诊人数将减少到3万以下。
+
+
+
+
